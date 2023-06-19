@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 import pandas as pd
 import openpyxl
 from random import randint
-from utils import derive_date, find_el_or_null
+from utils import derive_date, find_el_or_null, find_els_or_null, derive_date_jd
 from excel import extract_column_rows, export_to_existing_excel, find_first_blank_row, export_to_excel
 from tokenization import extract_keywords
 
@@ -14,13 +14,19 @@ excel_file_path = 'output.xlsx'
 
 def extract_job_description():
     d = driver # for easier reference
-    job_description = find_el_or_null(f'//div[@id="job_description"]//*[self::p or self::li or self::strong]', d)
+    date_info = find_el_or_null('//*[@id="last_posted_date"]', d)
+    date_info = date_info.text if date_info != False else None
+    print(date_info)
+    date_info = derive_date_jd(date_info)
+    print(date_info)
+    job_description = find_els_or_null(f'//div[@id="job_description"]//*[self::p or self::li or self::strong]', d)
     combined_text = ' '.join(p_tag.text for p_tag in job_description)
     print(combined_text)
     # job_description = job_description.text if job_description != False else None
     
 
     get_data.append({
+        'date_info': date_info,
         'job_description': combined_text,
         'keywords': [],
         'relevance': 0
@@ -46,9 +52,9 @@ href_list = extract_column_rows(excel_file_path, 'href', start_row)
 
 # for loop to get all job listings pages
 for index, url in enumerate(href_list):
-    # if index > 0:
-    #     print("breaking, index bigger than 1")
-    #     break
+    if index > 0:
+        print("breaking, index bigger than 1")
+        break
     print(f"printing page index: {index}, from url: {url}")
     driver.get(url)
     time.sleep(3)
