@@ -77,10 +77,10 @@ def get_all_listings():
 # set up driver
 options = Options()
 options.add_experimental_option("detach", True) #to keep the driver open after the script finishes
-options.add_argument('user-data-dir=C:\\Users\\USER\\Desktop\\SDE-learnings\\projects\\mycareersfuture\\profile')
-options.add_argument('--profile-directory=Profile 1')
+options.add_argument(user_profile_path)
+options.add_argument(f'--profile-directory={user_profile_name}')
 
-# Add additional arguments to clear the cache
+# Add additional arguments to clear the cache, history, cookies, etc.
 options.add_argument("--disable-application-cache")
 options.add_argument("--disable-cache")
 options.add_argument("--disable-offline-load-stale-cache")
@@ -98,10 +98,12 @@ driver = webdriver.Chrome(options=options)
 # initialise get data for excel export
 get_data = []
 
+search_query = search_query.replace(" ", "%20")
+
 # for loop to get all pages
 for i in range(0, max_pages):
     print("printing page: ", i)
-    driver.get(f'https://www.mycareersfuture.gov.sg/search?search=software%20engineer&sortBy=new_posting_date&page={i}')
+    driver.get(f'https://www.mycareersfuture.gov.sg/search?search={search_query}&sortBy=new_posting_date&page={i}')
     time.sleep(3)
     get_all_listings()
     # get_data.append(get_all_listings())
