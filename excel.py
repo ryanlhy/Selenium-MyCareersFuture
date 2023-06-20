@@ -24,6 +24,11 @@ def combine_old_and_new_data(excel_file_path, new_rows, column_name):
     new_data = pd.DataFrame(new_rows)
     print("new data...........")
     print(new_data)
+
+    # Reset the index of existing_data before concatenation 
+    # to avoid adding a new column 'unamed: 0'
+    existing_data.reset_index(drop=True, inplace=True)
+
     # Concatenate the new DataFrame with the existing DataFrame
     combined_data = pd.concat([new_data, existing_data], ignore_index=True)
     print("combined data...........")
