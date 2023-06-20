@@ -48,3 +48,5 @@ def find_els_or_null(element, driver):
     except:
         print(f'{element} does not exist')
         return False
+
+        
