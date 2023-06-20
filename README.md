@@ -4,7 +4,7 @@ This is a mini-project that identify available listings in mycareerfuture websit
 ## How to Run
 To be added soon
 
-##Entry points
+## Entry points
 run_project.py: extract listings based on keyword
 extract_jd.py: extract job description based on link extract in run_project.py
 apply.py: apply role
