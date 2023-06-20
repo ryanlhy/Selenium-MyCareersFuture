@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import time
 from selenium.webdriver.common.by import By
 import pandas as pd
@@ -15,17 +16,43 @@ from tokenization import extract_keywords
 
 excel_file_path = 'output.xlsx'
 
+class wait_for_any_element_to_load(object):
+    def __init__(self, locators):
+        self.locators = locators
+
+    def __call__(self, driver):
+        for locator in self.locators:
+            try:
+                if EC.presence_of_element_located(locator)(driver):
+                    return locator
+            except NoSuchElementException:
+                pass
+        return False
+
 def apply_to_job(driver, url):
     driver.get(url) # go to url
     try:
-        # if application already been submitted, redirected to error page
-        # note: elements, not element, no error thrown if not found unlike find_element. it reutrns empty list
-        error_page = driver.find_elements(By.XPATH, '//*[@id="job-not-permitted-page"]')
-        if len(error_page) > 0:
-            return 'applied' # already applied
+        # # if application already been submitted, redirected to error page
+        # # note: elements, not element, no error thrown if not found unlike find_element. it reutrns empty list
+        # error_page = driver.find_elements(By.XPATH, '//*[@id="job-not-permitted-page"]')
+        # print(f'error_page: {error_page}')
+        # if len(error_page) > 0:
+        #     print(f'Already applied to {url}')
+        #     print(f'error_page: {error_page}')
+        #     return 'applied' # already applied
 
-        # Wait for login and visibility of the "Next" button
-        WebDriverWait(driver, 60).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="application-details-save-button"]')))
+        # # Wait for login and visibility of the "Next" button
+        # WebDriverWait(driver, 60).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="application-details-save-button"]')))
+        
+        ######## added part #############################
+        locator = WebDriverWait(driver, 60).until(
+        wait_for_any_element_to_load([(By.XPATH, '//*[@id="application-details-save-button"]'), 
+                                      (By.XPATH, '//*[@id="job-not-permitted-page"]')])
+        )
+        if locator[1] == '//*[@id="job-not-permitted-page"]':
+            print("Error page is present")
+            return 'applied'
+        ######## added part #############################
 
         # Once we're logged in and the "Next" button is visible, proceed with clicking it
         next_button = driver.find_element(By.XPATH,'//*[@id="application-details-save-button"]')
@@ -33,7 +60,7 @@ def apply_to_job(driver, url):
 
         # Wait for login and visibility of the "Submit" button
         WebDriverWait(driver, 60).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="react-root"]//button[@data-cy="job-application-review__submit-button"]')))
-
+        time.sleep(1)
         # Click the "Submit" button
         submit_button = driver.find_element(By.XPATH,'//*[@id="react-root"]//button[@data-cy="job-application-review__submit-button"]')
         submit_button.click()
@@ -45,6 +72,8 @@ def apply_to_job(driver, url):
     except NoSuchElementException:
         print(f'Could not complete application at {url}.')
         return 'Element not found'
+    except TimeoutException:
+        print("Neither element was found within the given time")
     except Exception as e:
         print(f'An error occurred: {str(e)}')
         return 'Error'
