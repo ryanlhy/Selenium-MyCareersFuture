@@ -9,6 +9,7 @@ from random import randint
 from utils import derive_date, find_el_or_null, find_els_or_null, derive_date_jd
 from excel import extract_column_rows, export_to_existing_excel, find_first_blank_row, export_to_excel
 from tokenization import extract_keywords
+import sys
 
 excel_file_path = 'output.xlsx'
 
@@ -44,7 +45,12 @@ driver = webdriver.Chrome(options=options)
 
 # initialise get data for excel export
 get_data = []
+
 start_row = find_first_blank_row(excel_file_path, 'job_description')
+if start_row == None:
+    print('All job description are filled!')
+    sys.exit() #exit script if no more rows to extract
+
 print(start_row, 'start row')
 # get href list
 href_list = extract_column_rows(excel_file_path, 'href', start_row)
