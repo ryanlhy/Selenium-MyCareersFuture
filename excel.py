@@ -1,4 +1,6 @@
 import pandas as pd
+import datetime
+import shutil
 
 def export_to_excel(data, filename):
     df = pd.DataFrame(data)
@@ -103,7 +105,12 @@ def export_to_existing_excel(excel_file_path, data, start_row):
     # Save the modified DataFrame to the Excel file
     data_frame.to_excel(excel_file_path, index=False)
     
-
+def copy_excel_file_with_timestamp(source_path, destination_directory):
+    current_datetime = datetime.datetime.now()
+    timestamp = current_datetime.strftime("%Y%m%d_%H%M%S")
+    file_name = f"copy_{timestamp}.xlsx"
+    destination_path = f"{destination_directory}/{file_name}"
+    shutil.copy2(source_path, destination_path)
 
 # # Save the key-value pairs to a file
 # with open('header_dict.txt', 'w') as file:
