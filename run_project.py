@@ -7,11 +7,8 @@ import pandas as pd
 import openpyxl
 from random import randint
 from utils import derive_date, find_el_or_null, find_els_or_null
-from excel import export_to_excel, combine_old_and_new_data
+from excel import export_to_excel, combine_old_and_new_data, copy_excel_file_with_timestamp
 from config import *
-
-# excel_file_path = 'output.xlsx'
-# max_pages = 1
 
 def get_all_listings():
     d = driver # for easier reference
@@ -61,18 +58,17 @@ def get_all_listings():
             'apply': ''
         })
 
-        print(f'title_element: {title_element}')
+        # print(f'title_element: {title_element}')
         # print(f'salary_range_bottom: {salary_range_bottom}')
         # print(f'salary_range_top: {salary_range_top}')
         # print(f'href_element: {href_element}')
         # print(f'applications: {applications}')
         # print(f'location: {location}')
-        print(f'date_text: {date_text}')
-        print(f'date_info: {date_info}')
+        # print(f'date_text: {date_text}')
+        # print(f'date_info: {date_info}')
         i += 1
 
     # return data
-
 
 # set up driver
 options = Options()
@@ -106,31 +102,17 @@ for i in range(0, max_pages):
     driver.get(f'https://www.mycareersfuture.gov.sg/search?search={search_query}&sortBy=new_posting_date&page={i}')
     time.sleep(3)
     get_all_listings()
-    # get_data.append(get_all_listings())
-
-# # Read the Excel file into a pandas DataFrame
-# existing_data = pd.read_excel(excel_file_path)
 
 try:
-    # existing_data = pd.read_excel(excel_file_path) 
-    # # Process the data or perform actions on the DataFrame
-    # print(f"file '{excel_file_path}' found.")
-    # print('Existing data...........')
-    # print(existing_data)
-    # print('strip extra whitespaces..........')
-    # existing_data.columns = existing_data.columns.str.strip()
-    # print(existing_data)
     get_data = combine_old_and_new_data(excel_file_path, get_data, 'href')
 
 except FileNotFoundError:
     print(f"File '{excel_file_path}' not found. Creating and Exporting to {excel_file_path}.")
-    
+
+copy_excel_file_with_timestamp(excel_file_path, 'excel_record' )
+
 # export directly to excel
 export_to_excel(get_data, excel_file_path) # note, is this line even needed if error is found?
 
 # time.sleep(int(sec))
 print(f'Completed! Export to {excel_file_path}')
-
-
-# time.sleep(300)  # Let the user actually see something!
-#https://stackoverflow.com/questions/56585508/invalidargumentexception-message-invalid-argument-user-data-directory-is-alre
